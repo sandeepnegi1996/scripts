@@ -1,0 +1,60 @@
+-ExecutionPolicy Bypass -File "D:\priyusandy\sandy\code\scripts\AutoUpdate.ps1"
+
+
+"C:\Program Files\PowerShell\7\pwsh.exe"
+
+
+Add arguments: -ExecutionPolicy Bypass -File "C:\Scripts\AutoUpdate.ps1" (Replace the path with where you actually saved your file).
+
+
+-ExecutionPolicy Bypass -File "D:\priyusandy\sandy\code\scripts\SmartCleanup.ps1"
+
+
+Start-Work.ps1
+Phase 1
+
+# --- CONFIG & LOGGING ---
+$LogFile = "$env:USERPROFILE\Desktop\workspace_launch.log"
+Start-Transcript -Path $LogFile -Append  # Records everything that happens
+
+$Contexts = @{
+    "Repo" = "C:\Users\YourName\Repos\Project-X"
+    "Vault" = "EngineeringNotes"
+}
+
+try {
+    Write-Host "--- WORKSPACE DEPLOYMENT STARTED at $(Get-Date) ---" -ForegroundColor Blue
+
+    # 1. Connectivity Check
+    if (Test-Connection 8.8.8.8 -Count 1 -Quiet) {
+        Start-Process "chrome.exe" -ArgumentList "https://github.com", "https://jira.com"
+    }
+
+    # 2. Git Sync (Production Standard: Update before you code)
+    if (Test-Path $Contexts.Repo) {
+        Push-Location $Contexts.Repo
+        Write-Host "Updating local repository..."
+        git pull --quiet
+        Pop-Location
+    }
+
+    # 3. Launch Dev Environment (Windows Terminal with Split Panes)
+    # This opens the terminal, splits it, and runs 'npm start' in one pane
+    $TerminalArgs = "-d `"$($Contexts.Repo)`" ; split-pane -v -d `"$($Contexts.Repo)`" powershell -NoExit -Command 'npm start'"
+    Start-Process "wt" -ArgumentList $TerminalArgs
+
+    # 4. Heavyweight Apps (IntelliJ)
+    Start-Process "idea64.exe" -ArgumentList $Contexts.Repo
+
+    Write-Host "✅ Workspace Ready." -ForegroundColor Green
+}
+catch {
+    Write-Error "Deployment Failed: $_"
+}
+finally {
+    Stop-Transcript
+}
+
+Phase 2 
+Would you like me to show you how to set up a "Shutdown-Work.ps1" 
+script that cleanly closes these apps and pushes your Git branches at the end of the day?
